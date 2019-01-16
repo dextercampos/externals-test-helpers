@@ -1,0 +1,19 @@
+{
+    "name": "dextercampos/externals-test-helper",
+    "license": "MIT",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "autoload": {
+        "psr-4": {
+            "DexterCampos\\Externals\\Test\\Helpers\\": "src/"
+        }
+    },
+    "require-dev": {
+        "php": "^7.2",
+        "phpunit/phpunit": "^7.5",
+        "fzaninotto/faker": "^1.8",
+        "eoneopay/externals": "dev-master",
+        "mockery/mockery": "^1.2",
+        "doctrine/orm": "^2.6"
+    }
+}
