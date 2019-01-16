@@ -1,5 +1,5 @@
 {
-    "name": "dextercampos/externals-test-helper",
+    "name": "dextercampos/externals-test-helpers",
     "license": "MIT",
     "minimum-stability": "dev",
     "prefer-stable": true,
