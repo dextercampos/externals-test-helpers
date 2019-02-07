@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace DexterCampos\Externals\Test\Helpers\EntityManager;
+namespace StepTheFkUp\DoctrineTestHelpers\MockBuilder\ORM;
 
 use Mockery\ExpectationInterface;
-use DexterCampos\Externals\Test\Helpers\EntityManager\Interfaces\ReturnSelfInterface;
+use StepTheFkUp\DoctrineTestHelpers\MockBuilder\ORM\Interfaces\ReturnSelfInterface;
 
 class ReturnSelf implements ReturnSelfInterface
 {

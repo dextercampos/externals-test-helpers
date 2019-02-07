@@ -1,10 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace DexterCampos\Externals\Test\Helpers\EntityManager;
+namespace StepTheFkUp\DoctrineTestHelpers\MockBuilder\ORM;
 
 use Closure;
-use EoneoPay\Externals\ORM\Interfaces\EntityInterface;
 use Faker\Factory as FakerFactory;
 use Faker\Generator;
 use Mockery;
@@ -14,9 +13,10 @@ use PHPUnit\Framework\Assert;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;
-use DexterCampos\Externals\Test\Helpers\EntityManager\Interfaces\AssertInterface;
-use DexterCampos\Externals\Test\Helpers\EntityManager\Interfaces\MockBuilderInterface;
-use DexterCampos\Externals\Test\Helpers\EntityManager\Interfaces\ReturnSelfInterface;
+use RuntimeException;
+use StepTheFkUp\DoctrineTestHelpers\MockBuilder\ORM\Interfaces\AssertInterface;
+use StepTheFkUp\DoctrineTestHelpers\MockBuilder\ORM\Interfaces\MockBuilderInterface;
+use StepTheFkUp\DoctrineTestHelpers\MockBuilder\ORM\Interfaces\ReturnSelfInterface;
 
 /**
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects) Suppress due to dependency
@@ -35,26 +35,11 @@ abstract class AbstractMockBuilder implements MockBuilderInterface
     private $faker;
 
     /**
-     * @var \Mockery\MockInterface
-     */
-    private $mock;
-
-    /**
-     * AbstractMockBuilder constructor.
-     *
-     * @param \Mockery\MockInterface|null $mock
-     */
-    public function __construct(?MockInterface $mock = null)
-    {
-        $this->mock = $mock ?? Mockery::mock($this->getClassToMock());
-    }
-
-    /**
      * Add closure config.
      *
      * @param \Closure $closure
      *
-     * @return \DexterCampos\Externals\Test\Helpers\EntityManager\AbstractMockBuilder
+     * @return \StepTheFkUp\DoctrineTestHelpers\MockBuilder\ORM\AbstractMockBuilder
      */
     public function addConfiguration(Closure $closure): self
     {
@@ -90,7 +75,7 @@ abstract class AbstractMockBuilder implements MockBuilderInterface
      * @param null|mixed[] $expected
      * @param null|mixed $exception
      *
-     * @return \DexterCampos\Externals\Test\Helpers\EntityManager\AbstractMockBuilder
+     * @return self
      */
     public function shouldReceive(
         int $count,
@@ -129,7 +114,7 @@ abstract class AbstractMockBuilder implements MockBuilderInterface
                     }
 
                     if ($this->validateKey($exception ?? '') === false) {
-                        throw new \RuntimeException(
+                        throw new RuntimeException(
                             \sprintf('Something went wrong while mocking throws %s', $exception)
                         );
                     }
@@ -165,27 +150,37 @@ abstract class AbstractMockBuilder implements MockBuilderInterface
     }
 
     /**
-     * Mock should receive method call and throw exception.
+     * @param int $count
      *
-     * @param int $callCount
-     * @param string $exception
-     * @param string $method
-     * @param mixed[]|\Closure $argsOrClosure
-     *
-     * @return \DexterCampos\Externals\Test\Helpers\EntityManager\AbstractMockBuilder
+     * @return \StepTheFkUp\DoctrineTestHelpers\MockBuilder\ORM\AbstractMockBuilder
      */
-    public function withException(int $callCount, string $exception, string $method, $argsOrClosure): self
+    public function withCount(int $count): self
     {
-        $this->addConfiguration(
-            function (MockInterface $mock) use ($callCount, $exception, $method, $argsOrClosure): void {
-                $mock->shouldReceive($method)->times($callCount)
-                    ->with($argsOrClosure)
-                    ->andThrow($exception);
-            }
-        );
+        $this->getConfiguration()->times($count);
 
         return $this;
     }
+
+    /**
+     * Mock should throw exception from latest mock method called.
+     *
+     * @param string $exception
+     *
+     * @return self
+     */
+    public function withException(string $exception): self
+    {
+        $this->getConfiguration()->andThrow($exception);
+
+        return $this;
+    }
+
+    /**
+     * Get available methods that are allowed to be mocked.
+     *
+     * @return string[]
+     */
+    abstract protected function getAvailableMethods(): array;
 
     /**
      * Get class to mock.
@@ -197,29 +192,30 @@ abstract class AbstractMockBuilder implements MockBuilderInterface
     /**
      * Assert expected data in entity.
      *
-     * @param string $class
-     * @param \EoneoPay\Externals\ORM\Interfaces\EntityInterface $entity
+     * @param string $className
+     * @param mixed $object
      * @param mixed[]|null $data
      *
      * @return void
      */
-    protected function assertExpectedEntity(string $class, EntityInterface $entity, ?array $data = null): void
+    protected function assertExpectedEntity(string $className, $object, ?array $data = null): void
     {
-        Assert::assertInstanceOf($class, $entity);
+        Assert::assertInstanceOf($className, $object);
 
         if ($data === null) {
             return;
         }
 
-        foreach ($data as $key => $value) {
-            $getter = \sprintf('get%s', $key);
-            if ($value instanceof AssertInterface) {
-                $value->assert($entity->$getter());
+        foreach ($data as $key => $expected) {
+            $actual = $this->getValue($key, $object);
+
+            if ($expected instanceof AssertInterface) {
+                $expected->assert($actual);
 
                 continue;
             }
 
-            Assert::assertSame($value, $entity->$getter());
+            Assert::assertSame($expected, $actual);
         }
     }
 
@@ -330,16 +326,51 @@ abstract class AbstractMockBuilder implements MockBuilderInterface
     }
 
     /**
+     * Get configuration by index. Returns last config if null passed.
+     *
+     * @param null|int $index
+     *
+     * @return \Mockery\Expectation
+     */
+    private function getConfiguration(?int $index = null): Mockery\Expectation
+    {
+        return $this->configuration[$index ?? (\count($this->configuration) - 1)];
+    }
+
+    /**
+     * Get value from object using getter or property access.
+     *
+     * @param string $key
+     * @param mixed $object
+     *
+     * @return mixed
+     */
+    private function getValue(string $key, $object)
+    {
+        $getter = \sprintf('get%s', $key);
+        if (\method_exists($object, $getter) === true) {
+            return $object->$getter();
+        }
+
+        if (\property_exists($object, $key) === true) {
+            return $object->{$key};
+        }
+        throw new RuntimeException('Property or getter does not exist in object.');
+    }
+
+    /**
      * Call closure configurations and return mock.
      *
      * @return \Mockery\MockInterface
      */
     final public function build(): MockInterface
     {
+        $mock = Mockery::mock($this->getClassToMock());
+
         foreach ($this->configuration as $configuration) {
-            $configuration($this->mock);
+            $configuration($mock);
         }
 
-        return $this->mock;
+        return $mock;
     }
 }

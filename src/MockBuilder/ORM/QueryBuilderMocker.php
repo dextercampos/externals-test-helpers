@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace DexterCampos\Externals\Test\Helpers\EntityManager;
+namespace StepTheFkUp\DoctrineTestHelpers\MockBuilder\ORM;
 
 use Doctrine\ORM\QueryBuilder;
 
@@ -19,42 +19,22 @@ use Doctrine\ORM\QueryBuilder;
  * @method self hasSetParameter(int $count, ?array $expectation = null, $return = null, $exception = null)
  * @method self hasSetParameters(int $count, ?array $expectation = null, $return = null, $exception = null)
  * @method self hasWhere(int $count, ?array $expectation = null, $return = null, $exception = null)
+ *
+ * @see \Doctrine\ORM\QueryBuilder
  */
 class QueryBuilderMocker extends AbstractMockBuilder
 {
-    /**
-     * Known methods use in query builder.
-     *
-     * @var string[]
-     */
-    private static $constantMethod = [
-        'addSelect',
-        'andWhere',
-        'expr',
-        'getQuery',
-        'groupBy',
-        'innerJoin',
-        'leftJoin',
-        'orderBy',
-        'orWhere',
-        'select',
-        'setParameter',
-        'setParameters',
-        'where'
-    ];
-
     /**
      * Adding select in query builder mock.
      *
      * @param string $name
      * @param mixed[] $parameter
      *
-     * @return \DexterCampos\Externals\Test\Helpers\EntityManager\QueryBuilderMocker
      */
     public function __call(string $name, array $parameter): self
     {
         $method = \lcfirst(\substr($name, 3));
-        if (\in_array($method, self::$constantMethod) === false) {
+        if (\in_array($method,$this->getAvailableMethods()) === false) {
             throw new \RuntimeException(\sprintf('%s not in common method', $method));
         }
 
@@ -62,6 +42,25 @@ class QueryBuilderMocker extends AbstractMockBuilder
         $this->shouldReceive($parameter[0], $method, $parameter[2], $parameter[1], $exception);
 
         return $this;
+    }
+
+    protected function getAvailableMethods(): array
+    {
+        return [
+            'addSelect',
+            'andWhere',
+            'expr',
+            'getQuery',
+            'groupBy',
+            'innerJoin',
+            'leftJoin',
+            'orderBy',
+            'orWhere',
+            'select',
+            'setParameter',
+            'setParameters',
+            'where'
+        ];
     }
 
     /**

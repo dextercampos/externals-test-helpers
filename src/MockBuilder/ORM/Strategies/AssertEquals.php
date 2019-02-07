@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace DexterCampos\Externals\Test\Helpers\EntityManager\Strategies;
+namespace StepTheFkUp\DoctrineTestHelpers\MockBuilder\ORM\Strategies;
 
 use PHPUnit\Framework\Assert;
-use DexterCampos\Externals\Test\Helpers\EntityManager\Interfaces\AssertInterface;
+use StepTheFkUp\DoctrineTestHelpers\MockBuilder\ORM\Interfaces\AssertInterface;
 
 /**
  * @SuppressWarnings(PHPMD.StaticAccess) Inherited from Assert

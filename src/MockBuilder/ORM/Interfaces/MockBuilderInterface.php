@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace DexterCampos\Externals\Test\Helpers\EntityManager\Interfaces;
+namespace StepTheFkUp\DoctrineTestHelpers\MockBuilder\ORM\Interfaces;
 
 use Mockery\MockInterface;
 

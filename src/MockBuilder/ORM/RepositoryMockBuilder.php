@@ -1,10 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace DexterCampos\Externals\Test\Helpers\EntityManager;
+namespace StepTheFkUp\DoctrineTestHelpers\MockBuilder\ORM;
 
 use Closure;
-use EoneoPay\Externals\ORM\Interfaces\RepositoryInterface;
 use Mockery\MockInterface;
 
 /**
@@ -22,7 +21,7 @@ class RepositoryMockBuilder extends AbstractMockBuilder
      * @param mixed $return
      * @param mixed ...$params
      *
-     * @return \DexterCampos\Externals\Test\Helpers\EntityManager\RepositoryMockBuilder
+     * @return \StepTheFkUp\DoctrineTestHelpers\MockBuilder\ORM\RepositoryMockBuilder
      */
     public function has(string $method, int $callCount, $return, ...$params): self
     {
@@ -162,5 +161,15 @@ class RepositoryMockBuilder extends AbstractMockBuilder
     protected function getClassToMock(): string
     {
         return RepositoryInterface::class;
+    }
+
+    /**
+     * Get available methods that are allowed to be mocked.
+     *
+     * @return string[]
+     */
+    protected function getAvailableMethods(): array
+    {
+        // TODO: Implement getAvailableMethods() method.
     }
 }
