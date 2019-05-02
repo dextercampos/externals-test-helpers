@@ -4,6 +4,9 @@ declare(strict_types=1);
 namespace DexterCampos\Externals\Test\Helpers\EntityManager;
 
 use Closure;
+use DexterCampos\Externals\Test\Helpers\EntityManager\Interfaces\AssertInterface;
+use DexterCampos\Externals\Test\Helpers\EntityManager\Interfaces\MockBuilderInterface;
+use DexterCampos\Externals\Test\Helpers\EntityManager\Interfaces\ReturnSelfInterface;
 use EoneoPay\Externals\ORM\Interfaces\EntityInterface;
 use Faker\Factory as FakerFactory;
 use Faker\Generator;
@@ -14,9 +17,6 @@ use PHPUnit\Framework\Assert;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;
-use DexterCampos\Externals\Test\Helpers\EntityManager\Interfaces\AssertInterface;
-use DexterCampos\Externals\Test\Helpers\EntityManager\Interfaces\MockBuilderInterface;
-use DexterCampos\Externals\Test\Helpers\EntityManager\Interfaces\ReturnSelfInterface;
 
 /**
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects) Suppress due to dependency
@@ -180,7 +180,7 @@ abstract class AbstractMockBuilder implements MockBuilderInterface
             function (MockInterface $mock) use ($callCount, $exception, $method, $argsOrClosure): void {
                 $mock->shouldReceive($method)->times($callCount)
                     ->with($argsOrClosure)
-                    ->andThrow($exception);
+                    ->andThrow(\is_string($exception) ? new $exception : $exception);
             }
         );
 
@@ -227,15 +227,15 @@ abstract class AbstractMockBuilder implements MockBuilderInterface
      * Throw exception or return null.
      *
      * @param \Mockery\ExpectationInterface $expectation
-     * @param null|string $exception
+     * @param null|mixed $exception
      *
      * @return void
      */
-    protected function expectExceptionOrReturnNull(ExpectationInterface $expectation, ?string $exception = null): void
+    protected function expectExceptionOrReturnNull(ExpectationInterface $expectation, $exception = null): void
     {
         if ($exception !== null) {
             /** @noinspection PhpUndefinedMethodInspection */
-            $expectation->andThrow($exception);
+            $expectation->andThrow(\is_string($exception) ? new $exception : $exception);
 
             return;
         }

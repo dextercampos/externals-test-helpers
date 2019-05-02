@@ -19,13 +19,13 @@ class EntityManagerMockBuilder extends AbstractMockBuilder
      * Mock should receive flush() call.
      *
      * @param int $callCount
-     * @param null|string $exception
+     * @param null|mixed $exception
      *
      * @return \DexterCampos\Externals\Test\Helpers\EntityManager\EntityManagerMockBuilder
      *
      * @see \EoneoPay\Externals\ORM\Interfaces\EntityManagerInterface::flush()
      */
-    public function hasFlush(int $callCount, ?string $exception = null): self
+    public function hasFlush(int $callCount, $exception = null): self
     {
         $this->addConfiguration(function (MockInterface $mock) use ($callCount, $exception): void {
             $config = $mock->shouldReceive('flush')
@@ -96,7 +96,7 @@ class EntityManagerMockBuilder extends AbstractMockBuilder
      * @param int $callCount
      * @param string $class
      * @param mixed[]|\EoneoPay\Externals\ORM\Interfaces\EntityInterface|\Closure|null $expectedData
-     * @param null|string $exception
+     * @param null|mixed $exception
      *
      * @return \DexterCampos\Externals\Test\Helpers\EntityManager\EntityManagerMockBuilder
      *
@@ -106,7 +106,7 @@ class EntityManagerMockBuilder extends AbstractMockBuilder
         int $callCount,
         string $class,
         $expectedData = null,
-        ?string $exception = null
+        $exception = null
     ): self {
         $this->addConfiguration(
             function (MockInterface $mock) use ($callCount, $class, $expectedData, $exception): void {
@@ -147,7 +147,7 @@ class EntityManagerMockBuilder extends AbstractMockBuilder
      * @param int $callCount
      * @param string $class
      * @param mixed $expectedData
-     * @param null|string $exception
+     * @param null|mixed $exception
      *
      * @return \DexterCampos\Externals\Test\Helpers\EntityManager\EntityManagerMockBuilder
      *
@@ -157,7 +157,7 @@ class EntityManagerMockBuilder extends AbstractMockBuilder
         int $callCount,
         string $class,
         $expectedData,
-        ?string $exception = null
+        $exception = null
     ): self {
         $this->addConfiguration(
             function (MockInterface $mock) use ($callCount, $class, $expectedData, $exception): void {
